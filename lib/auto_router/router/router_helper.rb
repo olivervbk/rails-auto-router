@@ -47,13 +47,13 @@ module AutoRouter::Router::RouterHelper
     ctrlr_m = method.to_sym
     opts[:via] = Array.wrap(opts[:via] || :get).map{|hm|hm.to_sym}
 
-    Router.map_route(self, ctrlr_m, opts)
+    AutoRouter::Router.map_route(self, ctrlr_m, opts)
   end
 
   ##
   # set controller 'root' path
   def route_path(path)
-    Router.map_controller(self, path: path)
+    AutoRouter::Router.map_controller(self, path: path)
   end
 
   def method_added(method)
@@ -66,6 +66,6 @@ module AutoRouter::Router::RouterHelper
   ##
   # helper method to list mapped methods
   def autoroute_methods
-    self.public_instance_methods.select{|m|m.to_s.start_with?(Router::METHOD_PREFIX)}
+    self.public_instance_methods.select{|m|m.to_s.start_with?(AutoRouter::Router::METHOD_PREFIX)}
   end
 end

@@ -1,11 +1,12 @@
 module AutoRouter::Router
-  require 'router/router_helper'
+
+  require_relative 'router/router_helper'
 
   METHOD_PREFIX = 'autoroute_'
 
   @included_targets = []
 
-  def Router.included(target)
+  def self.included(target)
     app_clz = ActionController::Base
     raise "AutoRouter::Router - #{self} is not a #{app_clz}#" unless target < app_clz
     @included_targets << target
@@ -42,15 +43,15 @@ module AutoRouter::Router
   # opts:
   #   autoload(true) - autoloads controllers to check mapped methods
   def self.route!(routes, opts={})
-    autoload = opts[:autload] || true
+    autoload = opts[:autoload].nil? ? true : opts[:autoload]
+    log_mappings = opts[:log].nil? ? true : opts[:log]
+
     Dir.glob(Rails.root.join('app/controllers', '**', '*.rb'), &method(:require)) if autoload
-
-    @config.each {|ctrlr| ctrlr.to_s.deconstantize}
-
 
     @config.each do |ctrlr, config|
       ctrlr_mappings = config[:mappings]
 
+      # .underscore already configures namespaces to slash ('/')
       resource_name = ctrlr.name.underscore.gsub('_controller', '').to_s
       controller_path = config[:path]
       ctrlr_mappings.each do |method_s, method_opts|
@@ -73,7 +74,6 @@ module AutoRouter::Router
         method_path = method_opts[:path] || method_s
         is_member = method_opts[:member] || method_params.include?(:id)
 
-        #TODO add support for controller namespaces...
         default_ctrlr_path = (is_member ? resource_name.singularize : resource_name)
         res_path = controller_path.blank? ? default_ctrlr_path : controller_path
 
@@ -81,10 +81,8 @@ module AutoRouter::Router
         match_path = (method_path.blank? ? resource_prefix : "#{resource_prefix}/#{method_path}").gsub('//', '/')
         to_path = "#{resource_name}##{mapped_method}"
 
-        #TODO check log?
-        puts "routes -> match '#{match_path}', to: '#{to_path}', via: #{via}"
+        puts "#{self} -> match '#{match_path}', to: '#{to_path}', via: #{via}" if log_mappings
 
-        #TODO improve route generation to prefer rails defaults instead of hardcoded ones.
         routes.match match_path, to: to_path, via: via
       end
     end #do

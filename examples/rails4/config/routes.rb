@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
 
-  AutoRouter::Router.route!(self)
+  AutoRouter::Router.route!(self, log: true)
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
