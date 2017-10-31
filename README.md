@@ -23,7 +23,7 @@ Add to controller, like the example:
 
 class ExampleController < ActionController::Base
   include AutoRouter::Router
-  route_path('/custom-path') # defeault would be controller name, this case '/example', '/examples'
+  #route_path('/custom-path') # default would be the controller resource, for this case '/example', '/examples'
   
   route #uses the next defined method. Should map to GET:'/examples/static'
   def static
@@ -35,9 +35,10 @@ class ExampleController < ActionController::Base
     render plain: "test_post: '#{id}' - '#{value}' - '#{optional}'"
   end
   
-  route_show
+  route_show #helper methods to route default actions route_[index, new, create, show, edit, update, destroy]
+  # see http://guides.rubyonrails.org/routing.html#crud-verbs-and-actions
   def show(id)
-    render plain: "show #{id}"
+    render plain: "show: #{id}"
   end
   
   routeable :test_get #routeable needs the method name. Maps to GET:'/example/:id/test_get'
@@ -70,7 +71,6 @@ This plugin should be able to coexist with traditional routing.
 3. publish 'stable' version.
 4. validate required/optional params in functions, needs to call an error function?
 5. able to configure custom behaviours depending on param names ('current_user', 'member' call special methods)
-
 
 ## Contributing
 Sure, just send me a pull request with the changes :)
