@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name        = 'auto_router'
-  spec.version     = '0.1.X'
+  spec.version     = '0.1.0'
   spec.date        = '2017-10-27'
   spec.summary     = 'Java Spring / C# WebMVC like Action mappings for Rails 4'
   spec.description = 'A different approach on rails routing.'
@@ -13,4 +13,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '12.0.0'
   spec.add_development_dependency 'rspec', '3.5.0'
   spec.add_development_dependency 'rspec-collection_matchers', '1.1.3'
+
+  spec.add_runtime_dependency 'rails', '>= 4'
 end
