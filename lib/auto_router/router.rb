@@ -59,8 +59,29 @@ module AutoRouter::Router
         raise "#{self}.routeable: public instance method '#{method} not found'" if method.nil?
 
         method_params = method.parameters.map {|type, param| param}
+
+        ## see RouterHelper#routeable
+        via = method_opts[:via]
+        method_path = method_opts[:path] || method_s
+        is_member = method_opts[:member] || method_params.include?(:id)
+
+        before_actions = method_opts[:before] || []
+        actions = method_opts[:action] || {}
+
+        ## create method wrapper in controller
         mapped_method = "#{METHOD_PREFIX}#{method_s}"
+        if ctrlr.public_instance_method(mapped_method)
+          raise "#{self}.routeable: method already exists: '#{mapped_method}'. Are you mapping the same method twice?"
+        end
+
         ctrlr.class_eval {
+          before_actions.each {|filter| before_action filter, only: mapped_method.to_sym}
+          actions.each{|type, filter_params|
+            filter = filter_params.delete(:filter)
+            filtered = {only: mapped_method.to_sym}.merge(filter_params)
+            send(type, filter, filtered)
+          }
+
           define_method(mapped_method) {
             params = send(:params)
             #TODO validate required params? -> redirect_to some kind of error method?
@@ -69,11 +90,7 @@ module AutoRouter::Router
           }
         }
 
-        ## see RouterHelper#routeable
-        via = method_opts[:via]
-        method_path = method_opts[:path] || method_s
-        is_member = method_opts[:member] || method_params.include?(:id)
-
+        ## map created method inside routes
         default_ctrlr_path = (is_member ? resource_name.singularize : resource_name)
         res_path = controller_path.blank? ? default_ctrlr_path : controller_path
 

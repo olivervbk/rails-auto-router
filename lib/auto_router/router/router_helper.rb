@@ -2,46 +2,56 @@ module AutoRouter::Router::RouterHelper
   @next_config = nil
 
   #TODO better name?
+  ##
+  # see #routeable for options
   def route(opts={})
     raise 'No method was defined since last RouterHelper.route. Did you mean routable ?' unless @next_config.nil?
     @next_config = opts
   end
 
-  # shortcut methods for default mappings
-  def route_index
-    route via: :get, path: '', member: false
+  # shortcut methods for default mappings. See #route
+  def route_index(opts={})
+    route({via: :get, path: '', member: false}.merge(opts))
   end
 
-  def route_new
-    route via: :get, path: '/new', member: false
+  def route_new(opts={})
+    route({via: :get, path: '/new', member: false}.merge(opts))
   end
 
-  def route_create
-    route via: :post, path: '', member: false
+  def route_create(opts={})
+    route({via: :post, path: '', member: false}.merge(opts))
   end
 
-  def route_show
-    route via: :get, path: '', member: true
+  def route_show(opts={})
+    route({via: :get, path: '', member: true}.merge(opts))
   end
 
-  def route_edit
-    route via: :get, path: '/edit', member: true
+  def route_edit(opts={})
+    route({via: :get, path: '/edit', member: true}.merge(opts))
   end
 
-  def route_update
-    route via: [:patch, :put], path: '', member: true
+  def route_update(opts={})
+    route({via: [:patch, :put], path: '', member: true}.merge(opts))
   end
 
-  def route_destroy
-    route via: [:delete], path: '', member: true
+  def route_destroy(opts={})
+    route({via: [:delete], path: '', member: true}.merge(opts))
   end
 
   ##
   # method: sym of controller method.
   # opts:
-  #   via: 'get', :get, [:get, :post], ['head']
+  #   via: what verb should be mapped, default:get. Examples: 'get', :get, [:get, :post], ['head']
   #   path: overwrite local path for method
-  #   member: if is member or not. default is check if 'id' param is defined
+  #   member: if is member or not. default: check if 'id' param is defined
+  #   before: what before_filter should be applied for this method. Examples: :require_login, [:require_login]
+  #   actions: actions for before|around|after|skip_before|etc*action filters.
+  #     see: http://guides.rubyonrails.org/action_controller_overview.html#filters
+  #     Example: {
+  #         before_action: {filter: :require_login},
+  #         around_action: {filter: :wrap_in_transaction},
+  #         skip_before_action: {filter: :log_all_requests}
+  #       }
   #TODO better name?
   def routeable(method, opts={})
     ctrlr_m = method.to_sym
